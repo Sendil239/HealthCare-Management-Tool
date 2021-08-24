@@ -1,0 +1,219 @@
+const express = require('express');
+const configFuncs = require('./db');
+const router = express();
+const bcrypt = require('bcrypt');
+
+var {passport, registerUser, checkAuthenticated, checkNotAuthenticated, patientAttendanceUpdate} = require('./passport-config');
+
+router.post('/register', checkNotAuthenticated, async function(req, res){   
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    registerUser({
+        name: req.body.name,
+        phone: req.body.phone,
+        password: hashedPassword,
+        role: req.body.role,
+        dob: req.body.dob,
+        date_of_joining: req.body.date_of_joining
+    }, function(result){
+            res.sendStatus(200);
+    });
+});
+
+router.post('/login', checkNotAuthenticated, passport.authenticate('local', {}), function(req, res){
+    res.sendStatus(200);
+});
+
+router.get('/authorize', checkAuthenticated, function(req, res){
+    res.sendStatus(200);
+});
+
+router.post('/logout', checkAuthenticated, function(req, res){
+    req.logOut();
+    res.sendStatus(200);
+});
+
+router.post('/checkin/:id', function(req, res){
+    //body_temperature, symptoms, date, time
+    req.body.id = req.params.id;
+    patientAttendanceUpdate(req.body, function(result){
+        res.sendStatus(200);
+    });
+});
+
+router.post('/checkout/:id', function(req, res){
+    //body_temperature, symptoms, date, time
+    req.body.id = req.params.id;
+    patientAttendanceUpdate(req.body, function(result){
+        res.sendStatus(200);
+    });
+});
+
+router.post('/user/:id/appointment', function(req, res){
+    //doctor_id, symptoms, date, time
+    res.sendStatus(200);
+});
+
+router.get('/user/:id/record', function(req, res){
+    var response = [{
+        diagnosis : "Heavy Fever",
+        prescription : [{
+            medicine : "Para",
+            morning : true,
+            evening : true,
+            night : true,
+            before_meal : true,
+            after_meal : false,
+            description : ""
+        }]
+    }];
+    res.sendStatus(JSON.stringify(response));
+});
+
+router.get('/user/doctor/:id/slot', function(req, res){
+    //date
+    var response = [{
+        time : "03:00"
+    }];
+    res.sendStatus(JSON.stringify(response));
+});
+
+router.post('/doctor', function(req, res){
+    //name, phone, password, speciality, role, dob, gender, date_of_joining
+    //id should be generated
+    res.sendStatus(200);
+});
+
+router.get('/doctor', function(req, res){
+    //template for each doctor
+    var response = [{
+        id : "1234",
+        name : "Dr. Kavin",
+        phone : "1234567890",
+        speciality : "Physician",
+        role : "Doctor",
+        dob : "1996-08-19",
+        gender : "Male",
+        date_of_joining : "2021-08-19",
+        status : "IN",
+        body_temperature : "27.6C"
+    }];
+    res.sendStatus(JSON.stringify(response));
+});
+
+router.get('/doctor/:id/appointment', function(req, res){
+    //date
+    var response = [{
+        id : "12345",
+        name : "Patient",
+        symptoms : "Symptoms",
+        date : "2021-08-19",
+        time : "05:00"
+    }];
+    res.sendStatus(JSON.stringify(response));
+});
+
+router.post('/doctor/prescribe/:id', function(req, res){
+    //diagnosis, [medicine, quantity, start_date, end_date, morning, afternoon, dinner, before_meal, after_meal]
+    res.sendStatus(200);
+});
+
+router.post('/nurse', function(req, res){
+    //name, phone, password, speciality, role, dob, gender, date_of_joining
+    res.sendStatus(200);
+});
+
+router.get('/nurse', function(req, res){
+    //template for each nurse
+    var response = [{
+        name : "Gopal",
+        phone : "1234567890",
+        speciality : "Staff Nurse",
+        role : "Nurse",
+        dob : "1996-08-19",
+        gender : "Male",
+        date_of_joining : "2021-08-19",
+        status : "IN",
+        body_temperature : "27.6C"
+    }];
+    res.sendStatus(JSON.stringify(response));
+});
+
+router.post('/worker', function(req, res){
+    //name, phone, password, speciality, role, dob, gender, date_of_joining
+    res.sendStatus(200);
+});
+
+router.get('/worker', function(req, res){
+    //template for each worker
+    var response = [{
+        name : "Gopal",
+        phone : "1234567890",
+        speciality : "Bed maker",
+        role : "Worker",
+        dob : "1996-08-19",
+        gender : "Male",
+        date_of_joining : "2021-08-19",
+        status : "IN",
+        body_temperature : "27.6C"
+    }];
+    res.sendStatus(JSON.stringify(response));
+});
+
+router.post('/ward', function(req, res){
+    //name, location, incharge, nurse
+    res.sendStatus(200);
+});
+
+router.put('/ward/:id', function(req, res){
+    //name, location, incharge, nurse
+    res.sendStatus(200);
+});
+
+router.get('/ward', function(req, res){
+    var response = [{ 
+        id : "2343",
+        name : "Ward A",
+        location : "Admin Block First Floor",
+        incharge : [{id : "1234", name : "Dr. Krishna", speciality : "Physician", phone : "1234567890", status : "IN"}],
+        nurse : [{id : "1235", name : "Shanmuga", speciality : "Staff Nurse", phone : "1234567890", status : "IN"}]
+    }];
+    res.set('Content-Type', 'application/json');
+    res.send(JSON.stringify(response));
+});
+
+router.post('/ward/:id/bed', function(req, res){
+    //name, facility, ventilator, oxygen_cylinder
+    res.sendStatus(200);
+});
+
+router.put('/ward/:id/bed/:bed_id', function(req, res){
+    //name, facility, ac, patient
+    res.sendStatus(200);
+});
+
+router.get('/ward/:id/bed/:bed_id', function(req, res){
+    var response = {
+        id : "124",
+        name : "B4",
+        ventilator : true,
+        oxygen_cylinder : true,
+        patient : {
+            id : "2311",
+            name : "Gopal",
+            phone : "1223343"
+        }
+    };
+    res.sendStatus(200);
+});
+
+router.post('/announcement', function(req, res){
+    //title, description, doctor, nurse, user
+    res.sendStatus(200);
+});
+
+router.get('/announcement', function(req, res){
+    //title, description, doctor, nurse, user
+    res.sendStatus(200);
+});
+
+module.exports = router;
