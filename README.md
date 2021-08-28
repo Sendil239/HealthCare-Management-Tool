@@ -6,10 +6,13 @@ user-details:
     CREATE TABLE user_details ( id int NOT NULL AUTO_INCREMENT,  
     name varchar(255) NOT NULL,  
     phone varchar(20) UNIQUE NOT NULL,    
-    passowrd varchar(100),
+    password varchar(100),
     role varchar(20) NOT NULL,
     dob DATE NOT NULL,
+    gender varchar(20) NOT NULL,
     date_of_joining DATE NOT NULL,
+    blood_group varchar(20),
+    speciality varchar(30) DEFAULT NULL,
     PRIMARY KEY (id)
     );
 
@@ -25,9 +28,12 @@ patient_records:
     );
 
 appointment:
-    CREATE TABLE patient_records ( id int NOT NULL AUTO_INCREMENT,  
+    CREATE TABLE appointment ( apnt_id int NOT NULL AUTO_INCREMENT,  
     patient_id int NOT NULL,
     doctor_id int NOT NULL,
-    appointment_time DATETIME NOT NULL
-    PRIMARY KEY (id)
+    appointment_time DATETIME NOT NULL,
+    symptoms VARCHAR(1000),
+    PRIMARY KEY (apnt_id),
+    FOREIGN KEY (patient_id) REFERENCES user_details(id),
+    FOREIGN KEY (doctor_id) REFERENCES user_details(id)
     );

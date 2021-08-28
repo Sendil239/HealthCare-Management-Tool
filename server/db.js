@@ -42,7 +42,9 @@ function queryUserByPhone(phone, cbk){
                 password : data.password,
                 designation : data.designation,
                 dob : data.dob,
-                date_of_joining : data.date_of_joining
+                gender : data.gender,
+                date_of_joining : data.date_of_joining,
+                blood_group : data.blood_group
             }
         });
         cbk(resultObj[0]);
@@ -50,8 +52,8 @@ function queryUserByPhone(phone, cbk){
 }
 
 function insertUser(data, cbk){
-    var {name, phone, password, role, dob, date_of_joining} = data;
-    getConnectionAndExecuteQuery("INSERT INTO user_details(name, phone, password, role, dob, date_of_joining) VALUES(?, ?, ?, ?, ?, ?)", [name, phone, password, role, dob, date_of_joining], (results) => {
+    var {name, phone, password, role, dob, gender, date_of_joining, blood_group} = data;
+    getConnectionAndExecuteQuery("INSERT INTO user_details(name, phone, password, role, dob, gender, date_of_joining, blood_group) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", [name, phone, password, role, dob, gender, date_of_joining, blood_group], (results) => {
         cbk(results);
     });
 }
@@ -81,6 +83,43 @@ function updatePatientRecord(data, cbk){
         }
     });
 }
+
+function getDetails(data, module, cbk){
+    if(module == "user_details"){
+        getConnectionAndExecuteQuery("SELECT * FROM user_details",[], (result)=>{
+            if(result.length > 0){
+                var values = [];
+                for(var i = 0; i < result.length; i++){
+                    values.push(result[i]);
+                }
+                cbk(values);
+            }else{
+                cbk({result : "failed"})
+            }
+        });
+    }else if(module == "appointment"){
+        getConnectionAndExecuteQuery("SELECT * FROM appointment LEFT JOIN user_details on appointment.doctor_id = user_details.id WHERE appointment.patient_id = ?",[data.patient_id], (result)=>{
+            if(result.length > 0){
+                var values = [];
+                for(var i = 0; i < result.length; i++){
+                    values.push({appointment_id : result[i].apnt_id, doctor:{ id : result[i].id, name: result[i].name, phone: result[i].phone, gender : result[i].gender, speciality : result[i].speciality}, symptoms: result[i].symptoms, appointment_time : result[i].appointment_time});
+                }
+                cbk(values)
+            }else{
+                cbk({result : "failed"})
+            }
+        });
+    }
+}
+
+function updateAppointment(data, cbk){
+    getConnectionAndExecuteQuery("INSERT INTO appointment(patient_id, doctor_id, appointment_time, symptoms) VALUES(?, ?, ?, ?)", [data.patient_id, data.doctor_id, data.appointment_time, data.symptoms], (results) => {
+        cbk(results);
+    });
+}
+
 exports.queryUserByPhone = queryUserByPhone;
 exports.insertUser = insertUser;
 exports.updatePatientRecord = updatePatientRecord;
+exports.getDetails = getDetails;
+exports.updateAppointment = updateAppointment;

@@ -2,7 +2,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 
-var {insertUser, queryUserByPhone, updatePatientRecord} = require('./db');
+var {insertUser, queryUserByPhone, updatePatientRecord, getDetails, updateAppointment} = require('./db');
 
 function registerUser(user, cbk){
     insertUser(user, function(result){
@@ -19,6 +19,25 @@ function patientAttendanceUpdate(data, cbk){
 function getUserByPhone(phone, done){
     queryUserByPhone(phone, function(result){
         done(result);
+    });
+}
+
+
+function getDetailsByParams(data, module, cbk){
+    if(module == "appointment"){
+        getDetails(data, module, function(result){
+            cbk(result);
+        });
+    }else if(module == "user_details"){
+        getDetails(data, module, function(result){
+            cbk(result);
+        });
+    }
+}
+
+function appointmentAddUpdate(data, cbk){
+    updateAppointment(data, function(result){
+        cbk(result);
     });
 }
 
@@ -70,3 +89,5 @@ exports.patientAttendanceUpdate = patientAttendanceUpdate;
 exports.getUserByPhone = getUserByPhone;
 exports.checkAuthenticated = checkAuthenticated;
 exports.checkNotAuthenticated = checkNotAuthenticated;
+exports.getDetailsByParams = getDetailsByParams;
+exports.appointmentAddUpdate = appointmentAddUpdate;
