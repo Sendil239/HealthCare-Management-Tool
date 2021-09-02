@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 
-var {passport, registerUser, checkAuthenticated, checkNotAuthenticated, patientAttendanceUpdate, getDetailsByParams, appointmentAddUpdate} = require('./passport-config');
+var {passport, registerUser, checkAuthenticated, checkNotAuthenticated, patientAttendanceUpdate, getDetailsByParams, appointmentAddUpdate, announcementAddUpdate} = require('./passport-config');
 
 router.post('/register', checkNotAuthenticated, async function(req, res){
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -33,6 +33,7 @@ router.get('/details', function(req, res){
 });
 
 router.post('/logout', checkAuthenticated, function(req, res){
+    session_userID = "";
     req.logOut();
     res.sendStatus(200);
 });
@@ -264,7 +265,9 @@ router.get('/ward/:id/bed/:bed_id', function(req, res){
 
 router.post('/announcement', function(req, res){
     //title, description, doctor, nurse, user
-    res.sendStatus(200);
+    announcementAddUpdate(req.body, function(result){
+        res.sendStatus(200);
+    });
 });
 
 router.get('/announcement', function(req, res){

@@ -2,7 +2,9 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 
-var {insertUser, queryUserByPhone, updatePatientRecord, getDetails, updateAppointment} = require('./db');
+var {insertUser, queryUserByPhone, updatePatientRecord, getDetails, updateAppointment, updateAnnouncement} = require('./db');
+
+var session_userID = "";
 
 function registerUser(user, cbk){
     insertUser(user, function(result){
@@ -41,6 +43,12 @@ function appointmentAddUpdate(data, cbk){
     });
 }
 
+function announcementAddUpdate(data, cbk){
+    updateAnnouncement(data, function(result){
+        cbk(result);
+    });
+}
+
 function initializePassport() {
   passport.use(new LocalStrategy({ usernameField: 'phone', passwordField: 'password' }, authenticateUser))
   passport.serializeUser((user, done) => done(null, user.phone))
@@ -57,6 +65,7 @@ function authenticateUser(phone, password, done) {
         try{
             const match = await bcrypt.compare(password, user.password);
             if(match){
+                global.session_userID = user.id;
                 return done(null, user);
             }else{
                 return done(null, false, 'Incorrect credentials');
@@ -79,7 +88,7 @@ function checkNotAuthenticated(req, res, next) {
         //res.sendStatus(401);
     }
     next();
-  }
+}
 
 initializePassport();
 
@@ -91,3 +100,4 @@ exports.checkAuthenticated = checkAuthenticated;
 exports.checkNotAuthenticated = checkNotAuthenticated;
 exports.getDetailsByParams = getDetailsByParams;
 exports.appointmentAddUpdate = appointmentAddUpdate;
+exports.announcementAddUpdate = announcementAddUpdate;

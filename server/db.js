@@ -118,8 +118,15 @@ function updateAppointment(data, cbk){
     });
 }
 
+function updateAnnouncement(data, cbk){
+    getConnectionAndExecuteQuery("INSERT INTO announcement(title, description, user_id) VALUES(?, ?, ?)", [data.title, data.description, session_userID], (results) => {
+        cbk(results);
+    });
+}
+
 exports.queryUserByPhone = queryUserByPhone;
 exports.insertUser = insertUser;
 exports.updatePatientRecord = updatePatientRecord;
 exports.getDetails = getDetails;
 exports.updateAppointment = updateAppointment;
+exports.updateAnnouncement = updateAnnouncement;

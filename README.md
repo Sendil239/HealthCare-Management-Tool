@@ -37,3 +37,13 @@ appointment:
     FOREIGN KEY (patient_id) REFERENCES user_details(id),
     FOREIGN KEY (doctor_id) REFERENCES user_details(id)
     );
+
+
+announcement:
+    CREATE TABLE announcement (announcement_id int NOT NULL AUTO_INCREMENT,  
+    title varchar(255) NOT NULL,  
+    description varchar(1000),    
+    user_id int,
+    PRIMARY KEY (announcement_id),
+    FOREIGN KEY (user_id) REFERENCES user_details(id)
+    );
