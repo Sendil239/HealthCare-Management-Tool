@@ -1,4 +1,5 @@
 # HealthCare-Management-Tool
+DataBase Schema 
 
 DB Name = healthcaremanagement_db
 Table:
